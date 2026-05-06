@@ -16,3 +16,12 @@ Obtain the OpenAPI 2.0 specification for the REST service, in JSON format, and s
 In the namespace where you want to define the REST service, use the file to create an instance of %DynamicObject.
 
 Then call the CreateApplication() method of the %REST.API class.
+
+```
+classmethod CreateApplication(applicationName As %String, 
+                              swagger As %DynamicObject = "", 
+                              ByRef features, 
+                              Output newApplication As %Boolean, 
+                              Output internalError As %Boolean) 
+                              as %Status
+```
