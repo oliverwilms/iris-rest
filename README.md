@@ -25,3 +25,8 @@ classmethod CreateApplication(applicationName As %String,
                               Output internalError As %Boolean) 
                               as %Status
 ```
+
+```
+Set obj = {}.%FromJSONFile("/upload_pdf_openapi_2_spec.json")
+zw ##class(%REST.API).CreateApplication("pdf",obj,.features,.new,.err)
+```
