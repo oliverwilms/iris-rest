@@ -15,6 +15,10 @@ XData OpenAPI [ MimeType = application/json ]
     "https"
   ],
   "paths":{
+    "/test":{
+      "get":{
+      }
+    },
     "/upload-pdf":{
       "post":{
         "summary":"Upload a PDF document",
