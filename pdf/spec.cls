@@ -1,0 +1,72 @@
+Class pdf.spec Extends %REST.Spec [ ProcedureBlock ]
+{
+
+XData OpenAPI [ MimeType = application/json ]
+{
+{
+  "swagger":"2.0",
+  "info":{
+    "version":"1.0.0",
+    "title":"PDF Upload API",
+    "description":"API endpoint to upload a PDF document"
+  },
+  "basePath":"/v1",
+  "schemes":[
+    "https"
+  ],
+  "paths":{
+    "/upload-pdf":{
+      "post":{
+        "summary":"Upload a PDF document",
+        "description":"Receives a PDF file from the client",
+        "consumes":[
+          "multipart/form-data"
+        ],
+        "produces":[
+          "application/json"
+        ],
+        "parameters":[
+          {
+            "name":"file",
+            "in":"formData",
+            "description":"The PDF file to upload",
+            "required":true,
+            "type":"file"
+          },
+          {
+            "name":"description",
+            "in":"formData",
+            "description":"Optional description of the PDF",
+            "required":false,
+            "type":"string"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"PDF uploaded successfully",
+            "schema":{
+              "type":"object",
+              "properties":{
+                "message":{
+                  "type":"string"
+                },
+                "fileName":{
+                  "type":"string"
+                }
+              }
+            }
+          },
+          "400":{
+            "description":"Invalid file or request"
+          },
+          "415":{
+            "description":"Unsupported Media Type (only PDF allowed)"
+          }
+        }
+      }
+    }
+  }
+}
+}
+
+}
