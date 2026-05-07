@@ -17,11 +17,13 @@ XData OpenAPI [ MimeType = application/json ]
   "paths":{
     "/test":{
       "get":{
+        "operationId":"test"
       }
     },
     "/upload-pdf":{
       "post":{
         "summary":"Upload a PDF document",
+        "operationId":"uploadPDF",
         "description":"Receives a PDF file from the client",
         "consumes":[
           "multipart/form-data"
