@@ -30,3 +30,5 @@ classmethod CreateApplication(applicationName As %String,
 Set obj = {}.%FromJSONFile("/upload_pdf_openapi_2_spec.json")
 zw ##class(%REST.API).CreateApplication("pdf",obj,.features,.new,.err)
 ```
+
+Create a web application that access the REST service.
