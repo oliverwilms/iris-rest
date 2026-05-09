@@ -36,3 +36,8 @@ zw ##class(%REST.API).CreateApplication("pdf",obj,.features,.new,.err)
 ```
 
 Create a web application that access the REST service.
+
+Test the REST API from IRIS terminal:
+```
+Do ##class(test.pdf).TestRESTpdf("")
+```
