@@ -43,3 +43,8 @@ Test the REST API from IRIS terminal:
 ```
 Do ##class(test.pdf).TestRESTpdf("")
 ```
+
+
+```
+"{"_$c(13,10,9)_"""errors"":[ {"_$c(13,10,9,9,9)_"""code"":8727,"_$c(13,10,9,9,9)_"""domain"":""%ObjectErrors"","_$c(13,10,9,9,9)_"""error"":""ERROR #8727: Parameter required: file."","_$c(13,10,9,9,9)_"""id"":""RESTRequired"","_$c(13,10,9,9,9)_"""params"":[""file"""_$c(13,10,9,9,9)_"]"_$c(13,10,9,9)_"}"_$c(13,10,9)_"],"_$c(13,10,9)_"""summary"":""ERROR #8727: Parameter required: file."""_$c(13,10)_"}"
+```
