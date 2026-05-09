@@ -35,7 +35,9 @@ Set obj = {}.%FromJSONFile("/upload_pdf_openapi_2_spec.json")
 zw ##class(%REST.API).CreateApplication("pdf",obj,.features,.new,.err)
 ```
 
-Create a web application that access the REST service.
+Create a web application with pdf.disp as Dispatch class
+
+![screenshot](https://github.com/oliverwilms/bilder/blob/main/pdf_Web_Application.png)
 
 Test the REST API from IRIS terminal:
 ```
