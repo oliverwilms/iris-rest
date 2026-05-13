@@ -274,10 +274,10 @@ Iain.MacDonald@intersystems.com
 ClassMethod TestRESTpdf(pFlag As %String = "", pKill = 1) As %Status
 {
 	If pKill Kill ^TESTunit
-	Do ..DebugTEST("Oliver.Util - TestRESTpdf")
+	Do ..DebugTEST("test.pdf - TestRESTpdf")
 	Set tSC = $$$OK
-	Set pIris = "11.222.33.44:52773"
-	If ("p" = $Extract(pFlag,1,1)) Set pIris = "portal.test.com:443"
+	Set pIris = ..GetTestConfigIRIS("oliver-test")
+	If ("p" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
 	Set pUrl = "/pdf/upload-pdf"
 	If ("p" = $Extract(pFlag,1,1)) Set pUrl = "/csp/pdf/EnsLib.REST.GenericService/upload-pdf"
 	If ("t" = $Extract(pFlag,1,1)) Set pUrl = "/pdf/test"
