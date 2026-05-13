@@ -1,7 +1,7 @@
 Class test.pdf
 {
 
-ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData As %DynamicObject, pType As %String = "GET", pSOAPFlag As %String = "@", pBody = "") As %Status
+ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData As %DynamicObject, pType As %String = "GET", pSOAPFlag As %String = "", pBody = "") As %Status
 {
 	#define maxRESTapiErr 3
 	#define maxRetries 2
@@ -23,6 +23,7 @@ ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData A
 		Set tRequest = ##class(%Net.HttpRequest).%New()
 		If (pSOAPFlag = "@") {
 			Set tSC = ..InsertMulti(.tRequest)
+			Do ..DebugTEST("CT = "_tRequest.ContentType)
 			Set pSOAPFlag = ""
 		}
 		If (pBody '= "") {
@@ -41,7 +42,6 @@ ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData A
 			//Supported schemes are Negotiate, NTLM and Basic.
 			Set tRequest.InitiateAuthentication = "Basic"
 			Set tReturn = ""
-			Set tSC = tRequest.SetHeader("Content-Type","multipart/form-data")
 		  If ("" = tReturn) {
 			Set tRequest.Username = "_SYSTEM"
 			Set tRequest.Password = "SYS"  // ..GetPass(pIris)
@@ -64,6 +64,7 @@ ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData A
 		Set test = 0
 		Set reset = 1
 		Do ..DebugTEST("location = "_$Get(location))
+		Do ..DebugTEST("CT2 = "_tRequest.ContentType)
 		Set tSC = tRequest.Send(type,location,test,reset)
 		If $$$ISERR(tSC) Do ..DebugStatus(tSC)
 		If (tPort = 443) {
@@ -194,11 +195,14 @@ ClassMethod InsertMulti(ByRef pRequest As %Net.HttpRequest) As %Status
 	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
 	Do xmlPart.SetHeader("Content-Disposition", tHeaderValue)
 	Set rootMIME = ##class(%Net.MIMEPart).%New()
+	Set rootMIME.ContentType = "multipart/form-data"
 	Do rootMIME.Parts.Insert(xmlPart)
 	Set pFile = "D:\tmp1\EU_MJB_#284_TSH_TEST.pdf"
 	Set filePart = ..InsertMultiGetFilePart(pFile)
 	Do rootMIME.Parts.Insert(filePart)
-	Set pRequest.ContentType = "multipart/related; type=text/xml; boundary="_rootMIME.Boundary
+	//Set pRequest.ContentType = "multipart/related; type=text/xml; boundary="_rootMIME.Boundary
+	Set tSC = pRequest.SetHeader("Content-Type","multipart/form-data; boundary="_rootMIME.Boundary)
+	Do ..DebugTEST("IM-CT = "_pRequest.ContentType)
 	Set writer = ##class(%Net.MIMEWriter).%New()
 	Do writer.OutputToStream(pRequest.EntityBody)
 	Do writer.WriteMIMEBody(rootMIME)
@@ -213,11 +217,60 @@ ClassMethod InsertMultiGetFilePart(pFile As %String = "") As %Net.MIMEPart
 	Set filePart.Body = fileStream
 	Set filePart.ContentType = "application/pdf"
 	Set tHeaderValue = "form-data; name='file'; filename='myPDFfile.pdf'"
-	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
+	//Set tHeaderValue = $Replace(tHeaderValue,"'","""")
 	Do filePart.SetHeader("Content-Disposition", tHeaderValue)
 	Quit filePart
 }
 
+/*
+WRC# 1011221 
+Hello Oliver.
+I came to the conclusion that the error that you are seeing is caused by a problem in your test.pdf.cls calling code, 
+rather than in the REST service that has been generated from the OpenAPI javascript spec.
+
+What led me to that conclusion was that I tried calling the REST service using curl, rather than from the TestRESTpdf() method in test.pdf.cls, something like this:
+curl -v -u _SYSTEM:SYS -F "description=description" -F "file=@C:\temp\test.pdf;type=application/pdf" http://127.0.0.1:80/iris/pdf/upload-pdf
+
+When I did this, I did not see the error about "Parameter required: file".
+
+I then looked at the difference between what the curl command was sending and what test.pdf.cls was sending, and saw that in test.pdf.cls, InsertMulti() creates a multipart MIME body and sets this:
+
+Set pRequest.ContentType = "multipart/related; type=text/xml; boundary="_rootMIME.Boundary
+
+but later CallRESTapi() does this:
+
+Set tSC = tRequest.SetHeader("Content-Type","multipart/form-data")
+
+That later line is what reaches the server, and it loses the boundary. Both pieces are visible in test.pdf.cls.
+
+There is also a subtype mismatch: this should be multipart/form-data, not multipart/related.
+
+So I made corrections to test.pdf.cls. In InsertMulti(), change this:
+
+Set pRequest.ContentType = "multipart/related; type=text/xml; boundary="_rootMIME.Boundary
+
+to this:
+
+Set rootMIME.ContentType = "multipart/form-data"
+
+Set pRequest.ContentType = "multipart/form-data; boundary="_rootMIME.Boundary
+
+Then in CallRESTapi(), remove or comment out this line:
+
+Set tSC = tRequest.SetHeader("Content-Type","multipart/form-data")
+
+After making those changes, I no longer see the error when I call  TestRESTpdf().
+
+Please can you read what I've written, and confirm that the changes I've made make sense and fix the problem for you?
+
+Do you need further information or assistance with this? Please let me know. Thank you.
+
+Best regards,
+
+Iain
+Iain MacDonald
+Iain.MacDonald@intersystems.com
+*/
 ClassMethod TestRESTpdf(pFlag As %String = "", pKill = 1) As %Status
 {
 	If pKill Kill ^TESTunit
