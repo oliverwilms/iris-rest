@@ -65,6 +65,8 @@ ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData A
 		Set reset = 1
 		Do ..DebugTEST("location = "_$Get(location))
 		Do ..DebugTEST("CT2 = "_tRequest.ContentType)
+		//Set tSC = tRequest.SetHeader("Content-Type",tRequest.ContentType)
+		//If $$$ISERR(tSC) Do ..DebugStatus(tSC)
 		Set tSC = tRequest.Send(type,location,test,reset)
 		If $$$ISERR(tSC) Do ..DebugStatus(tSC)
 		If (tPort = 443) {
@@ -217,7 +219,7 @@ ClassMethod InsertMultiGetFilePart(pFile As %String = "") As %Net.MIMEPart
 	Set filePart.Body = fileStream
 	Set filePart.ContentType = "application/pdf"
 	Set tHeaderValue = "form-data; name='file'; filename='myPDFfile.pdf'"
-	//Set tHeaderValue = $Replace(tHeaderValue,"'","""")
+	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
 	Do filePart.SetHeader("Content-Disposition", tHeaderValue)
 	Quit filePart
 }
