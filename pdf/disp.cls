@@ -85,6 +85,7 @@ ClassMethod uploadPDF() As %Status
         If $data(%request.Data("description",1)) {
             Set pdescription=%request.Data("description",1)
         }
+        Set ^IRISTEMP("pdf",otw,"pdescription")=$Get(pdescription)
         Set response=##class(pdf.impl).uploadPDF(pfile,.pdescription)
         Do ##class(pdf.impl).%WriteResponse(response)
     } Catch (ex) {
