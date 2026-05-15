@@ -1,12 +1,15 @@
 import os
 import requests
+from requests.auth import HTTPBasicAuth
 
-def upload_file(url, file_path, field_name="file", extra_data=None):
+def upload_file_with_auth(url, file_path, username, password, field_name="file", extra_data=None):
     """
-    Uploads a file to the given server URL using multipart/form-data.
+    Uploads a file to the given server URL using multipart/form-data with Basic Authentication.
 
     :param url: The endpoint URL to upload the file.
     :param file_path: Path to the file to be uploaded.
+    :param username: Basic Auth username.
+    :param password: Basic Auth password.
     :param field_name: The form field name for the file (default: 'file').
     :param extra_data: Optional dictionary of additional form fields.
     :return: Response object from the server.
@@ -22,7 +25,13 @@ def upload_file(url, file_path, field_name="file", extra_data=None):
         # Open file in binary mode
         with open(file_path, "rb") as f:
             files = {field_name: (os.path.basename(file_path), f)}
-            response = requests.post(url, files=files, data=data, timeout=15)
+            response = requests.post(
+                url,
+                files=files,
+                data=data,
+                auth=HTTPBasicAuth(username, password),  # Basic Auth
+                timeout=15
+            )
 
         # Raise HTTPError if status code is 4xx/5xx
         response.raise_for_status()
@@ -41,10 +50,16 @@ if __name__ == "__main__":
     # Create a sample file for demonstration
     if not os.path.exists(file_to_upload):
         with open(file_to_upload, "w") as f:
-            f.write("This is a test file for upload.\n")
+            f.write("This is a test file for upload with Basic Auth.\n")
 
-    # Upload file with extra form data
-    response = upload_file(upload_url, file_to_upload, extra_data={"user": "test_user"})
+    # Upload file with Basic Auth and extra form data
+    response = upload_file_with_auth(
+        upload_url,
+        file_to_upload,
+        username="myuser",       # Replace with your username
+        password="mypassword",   # Replace with your password
+        extra_data={"user": "test_user"}
+    )
 
     if response:
         print("Upload successful!")
