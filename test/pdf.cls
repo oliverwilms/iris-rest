@@ -43,8 +43,8 @@ ClassMethod CallRESTapi(pIris As %String, pUrl As %String, ByRef pResponseData A
 			Set tRequest.InitiateAuthentication = "Basic"
 			Set tReturn = ""
 		  If ("" = tReturn) {
-			Set tRequest.Username = "_SYSTEM"
-			Set tRequest.Password = "SYS"  // ..GetPass(pIris)
+			Set tRequest.Username = ..GetTestUsername()
+			Set tRequest.Password = ..GetTestPassword()
 			Do ..DebugTEST("Oliver.Util - SYS")
 		  } Else {
 			Set delim = $Extract(tReturn,1,1)			  
@@ -175,6 +175,18 @@ ClassMethod GetTestConfigIRIS(pIris As %String = "oliver-test") As %String
 ClassMethod GetTestConfigResponseFilename() As %String
 {
 	Quit "CallRESTresponse.xml"
+}
+
+ClassMethod GetTestPassword() As %String
+{
+	Set tReturn = $Get(^myFeeder("Config","IRIS","Password"))
+	Quit tReturn
+}
+
+ClassMethod GetTestUsername() As %String
+{
+	Set tReturn = $Get(^myFeeder("Config","IRIS","Username"))
+	Quit tReturn
 }
 
 ClassMethod GetTimeoutREST() As %String
@@ -349,6 +361,7 @@ ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
 {
 	Set obj = ##class(%SYS.Python).Import("upload_pdf")
 	// def upload_file(url, file_path, field_name="file", extra_data=None):
+	// def upload_file_with_auth(url, file_path, username, password, field_name="file", extra_data=None):
 	Set url = ""
 	Set pIris = ..GetTestConfigIRIS("oliver-test")
 	If ("p" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
@@ -359,8 +372,11 @@ ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
 	Set dao = {}
 	Set dao."description" = "test python desc"
 	Set url = "http://"_pIris_pUrl
+	Set username = ..GetTestUsername()
+	Set password = ..GetTestPassword()
 	zw
-	Do obj."upload_file"(url,pFile,fieldname,dao)
+	//Do obj."upload_file"(url,pFile,fieldname,dao)
+	Do obj."upload_file_with_auth"(url,pFile,username,password,fieldname,dao)
 	Quit $$$OK
 }
 
