@@ -191,7 +191,8 @@ ClassMethod InsertMulti(ByRef pRequest As %Net.HttpRequest) As %Status
 	Set xmlPart = ##class(%Net.MIMEPart).%New()
 	Set xmlStream = ##class(%GlobalCharacterStream).%New()
 	Do xmlStream.Write("description")
-	Set xmlPart.ContentType = "text/plain"
+	// Do not set Content-Type for a simple form field.
+	// Set xmlPart.ContentType = "text/plain"
 	Set xmlPart.Body = xmlStream
 	Set tHeaderValue = "form-data; name='description'"
 	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
@@ -291,4 +292,92 @@ ClassMethod TestRESTpdf(pFlag As %String = "", pKill = 1) As %Status
 	Quit tSC
 }
 
+/*
+Hello Oliver.
+
+In the current GitHub version, you are building the "description" as a %Net.MIMEPart, then you give it a body stream, and then you explicitly set:
+
+Set xmlPart.ContentType = "text/plain"
+
+Then you set:
+
+Content-Disposition: form-data; name="description"
+
+That makes IRIS treat the description part as a MIME stream, so it appears here:
+
+%request.MimeData("description",1)
+
+instead of here:
+
+%request.Data("description",1)
+
+
+To fix this, remove/comment out the ContentType setting for the description part, like this in InsertMulti():
+
+...
+    Set xmlPart = ##class(%Net.MIMEPart).%New()
+    Set xmlStream = ##class(%GlobalCharacterStream).%New()
+    Do xmlStream.Write("description")
+
+    // Do not set Content-Type for a simple form field.
+    //Set xmlPart.ContentType = "text/plain"
+
+    Set xmlPart.Body = xmlStream
+    Set tHeaderValue = "form-data; name='description'"
+    Set tHeaderValue = $Replace(tHeaderValue,"'","""")
+    Do xmlPart.SetHeader("Content-Disposition", tHeaderValue)
+...
+*/
+
+/*
+A common practice in Python is to use keyword arguments (also called “named arguments”) when defining a method. 
+This makes it easy to drop arguments when not needed or to specify arguments according to their names, not their positions.
+
+Since InterSystems IRIS does not have the concept of keyword arguments, you need to create a dynamic object to hold the keyword/value pairs
+
+If the method mymethod() were in a module called mymodule.py in the directory <installdir>/mgr/python, 
+you could import it into ObjectScript and then call it, as follows:
+
+USER>set obj = ##class(%SYS.Python).Import("mymodule")
+ 
+USER>set args = {"bar": 123, "foo": "foo"}
+ 
+USER>do obj.mymethod(args...)
+foo=foo, bar=123, baz=three
+*/
+ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
+{
+	Set obj = ##class(%SYS.Python).Import("upload_pdf")
+	// def upload_file(url, file_path, field_name="file", extra_data=None):
+	Set url = ""
+	Set pIris = ..GetTestConfigIRIS("oliver-test")
+	If ("p" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
+	Set pUrl = "/pdf/upload-pdf"
+	Set filepath = ""
+	Set pFile = "D:\tmp1\EU_MJB_#284_TSH_TEST.pdf"
+	Set fieldname = "file"
+	Set dao = {}
+	Set dao."description" = "test python desc"
+	Set url = "http://"_pIris_pUrl
+	zw
+	Do obj."upload_file"(url,pFile,fieldname,dao)
+	Quit $$$OK
+}
+
+ClassMethod TestPythonKw() As %String
+{
+	Set obj = ##class(%SYS.Python).Import("upload_pdf")
+	// def upload_file(url, file_path, field_name="file", extra_data=None):
+	Set args = {}
+	Set args."description" = "test python desc"
+	Do obj."upload_file"(args...)
+	// def upload_file(url, file_path, field_name="file", extra_data=None):
+	Quit ""
+}
+
+/*
+ClassMethod PyTest() [ Language = python ]
+{
+}
+*/
 }
