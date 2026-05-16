@@ -340,6 +340,34 @@ To fix this, remove/comment out the ContentType setting for the description part
     Do xmlPart.SetHeader("Content-Disposition", tHeaderValue)
 ...
 */
+ClassMethod TestDict(dao As %DynamicAbstractObject, Output mydata) As %Status
+{
+	If (0 = $Data(dao)) {
+		Write "Missing input",!
+		Quit 0
+	}
+	If (0 = $IsObject(dao)) {
+		Write "Invalid input",!
+		Quit 0
+	}
+	Try {
+		Write dao.%ToJSON()
+	} Catch ex {}
+	Set iter = dao.%GetIterator()
+	Set mydata = ##class(%SYS.Python).Builtins().dict()
+	While iter.%GetNext(.key, .value, .type) {
+		Write "element:"_key_"=/"_value_"/  "
+		Do mydata.setdefault(key, value)
+	}
+	zwrite mydata
+	/*
+mycar=2@%SYS.Python  ; {'make': 'Toyota', 'model': 'RAV4', 'color': 'blue'}  ; <OREF>
+ 
+USER>write mycar."__getitem__"("color")
+blue
+	*/
+	Quit $$$OK
+}
 
 /*
 A common practice in Python is to use keyword arguments (also called “named arguments”) when defining a method. 
@@ -371,12 +399,13 @@ ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
 	Set fieldname = "file"
 	Set dao = {}
 	Set dao."description" = "test python desc"
+	Set tSC = ..TestDict(dao, .dict)
 	Set url = "http://"_pIris_pUrl
 	Set username = ..GetTestUsername()
 	Set password = ..GetTestPassword()
 	zw
 	//Do obj."upload_file"(url,pFile,fieldname,dao)
-	Do obj."upload_file_with_auth"(url,pFile,username,password,fieldname,dao)
+	Do obj."upload_file_with_auth"(url,pFile,username,password,fieldname,dict)
 	Quit $$$OK
 }
 
