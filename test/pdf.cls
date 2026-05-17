@@ -304,6 +304,26 @@ ClassMethod TestRESTpdf(pFlag As %String = "", pKill = 1) As %Status
 	Quit tSC
 }
 
+ClassMethod TestRESTpdf2(pServer As %String = "", pRoute As %String = "", pKill = 1) As %Status
+{
+	If pKill Kill ^TESTunit
+	Do ..DebugTEST("test.pdf - TestRESTpdf2")
+	Set tSC = $$$OK
+	Set pIris = ..GetTestConfigIRIS("oliver-test")
+	If ("p" = $Extract(pServer,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
+	Set pUrl = "/pdf/upload-pdf"
+	If ("p" = $Extract(pServer,1,1)) Set pUrl = "/csp/testpdf/upload-pdf"
+	If ("p" = $Extract(pRoute,1,1)) Set pUrl = "/csp/pdf/EnsLib.REST.GenericService/upload-pdf"
+	If ("t" = $Extract(pRoute,1,1)) Set pUrl = "/pdf/test"
+	If ("t" = $Extract(pRoute,1,1)),("p" = $Extract(pServer,1,1)) Set pUrl = "/csp/testpdf/test"
+	Set pType = "POST"
+	If ("t" = $Extract(pRoute,1,1)) Set pType = "GET"
+	Set pSOAPflag = "@"
+	Set tSC = ..CallRESTapi(pIris,pUrl,.pResponseData,pType,pSOAPflag)
+	zw pResponseData
+	Quit tSC
+}
+
 /*
 Hello Oliver.
 
@@ -393,8 +413,14 @@ ClassMethod TestPython(pFlag As %String = "t", pKill = 1) As %Status
 	Set url = ""
 	Set pIris = ..GetTestConfigIRIS("oliver-test")
 	If ("p" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
-	If ("t" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
+	If ("t" = $Extract(pFlag,1,1)) {
+		Set pIris = ..GetTestConfigIRIS("portal")
+		Set pIris = $Replace(pIris,"https://","http://")
+	}
 	Set pUrl = "/pdf/upload-pdf"
+	If ("t" = $Extract(pFlag,1,1)) Set pUrl = "/pdf/test"
+	Set pType = "POST"
+	If ("t" = $Extract(pFlag,1,1)) Set pType = "GET"
 	Set filepath = ""
 	Set pFile = "D:\tmp1\EU_MJB_#284_TSH_TEST.pdf"
 	Set fieldname = "file"
