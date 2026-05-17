@@ -304,7 +304,7 @@ ClassMethod TestRESTpdf(pFlag As %String = "", pKill = 1) As %Status
 	Quit tSC
 }
 
-ClassMethod TestRESTpdf2(pServer As %String = "", pRoute As %String = "", pKill = 1) As %Status
+ClassMethod TestRESTpdf2(pServer As %String = "p", pRoute As %String = "", pKill = 1) As %Status
 {
 	If pKill Kill ^TESTunit
 	Do ..DebugTEST("test.pdf - TestRESTpdf2")
@@ -418,6 +418,7 @@ ClassMethod TestPython(pFlag As %String = "t", pKill = 1) As %Status
 		Set pIris = $Replace(pIris,"https://","http://")
 	}
 	Set pUrl = "/pdf/upload-pdf"
+	If ("p" = $Extract(pFlag,1,1)) Set pUrl = "/csp/testpdf/test"
 	If ("t" = $Extract(pFlag,1,1)) Set pUrl = "/pdf/test"
 	Set pType = "POST"
 	If ("t" = $Extract(pFlag,1,1)) Set pType = "GET"
