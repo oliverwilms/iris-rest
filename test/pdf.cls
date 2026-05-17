@@ -385,7 +385,7 @@ USER>set args = {"bar": 123, "foo": "foo"}
 USER>do obj.mymethod(args...)
 foo=foo, bar=123, baz=three
 */
-ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
+ClassMethod TestPython(pFlag As %String = "t", pKill = 1) As %Status
 {
 	Set obj = ##class(%SYS.Python).Import("upload_pdf")
 	// def upload_file(url, file_path, field_name="file", extra_data=None):
@@ -393,6 +393,7 @@ ClassMethod TestPython(pFlag As %String = "", pKill = 1) As %Status
 	Set url = ""
 	Set pIris = ..GetTestConfigIRIS("oliver-test")
 	If ("p" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
+	If ("t" = $Extract(pFlag,1,1)) Set pIris = ..GetTestConfigIRIS("portal")
 	Set pUrl = "/pdf/upload-pdf"
 	Set filepath = ""
 	Set pFile = "D:\tmp1\EU_MJB_#284_TSH_TEST.pdf"
