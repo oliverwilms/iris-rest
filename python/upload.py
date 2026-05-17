@@ -30,15 +30,19 @@ def upload_file_with_auth(url, file_path, username, password, field_name="file",
                 files=files,
                 data=data,
                 auth=HTTPBasicAuth(username, password),  # Basic Auth
-                timeout=15
+                timeout=15,
+                verify=false
             )
 
         # Raise HTTPError if status code is 4xx/5xx
         response.raise_for_status()
         return response
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error uploading file: {e}")
+    except requests.exceptions.RequestException as req_err:
+        print("Request failed:", req_err)
+        return None
+    except requests.exceptions.SSLError as ssl_err:
+        print("SSL verification failed:", ssl_err)
         return None
 
 
