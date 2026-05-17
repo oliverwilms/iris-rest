@@ -31,7 +31,7 @@ def upload_file_with_auth(url, file_path, username, password, field_name="file",
                 data=data,
                 auth=HTTPBasicAuth(username, password),  # Basic Auth
                 timeout=15,
-                verify=false
+                verify=False
             )
 
         # Raise HTTPError if status code is 4xx/5xx
