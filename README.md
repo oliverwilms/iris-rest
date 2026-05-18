@@ -106,3 +106,7 @@ startxref
 </HTTPMessage>
 <!-- Characters that could not be shown were removed for viewing purposes only -->
 ```
+
+```
+curl -v -u _SYSTEM:SYS -F "description=description" -F "file=@C:\temp\test.pdf;type=application/pdf" http://127.0.0.1:80/iris/pdf/upload-pdf
+```
