@@ -200,6 +200,7 @@ ClassMethod GetTimeoutREST() As %String
 
 ClassMethod InsertMulti(ByRef pRequest As %Net.HttpRequest) As %Status
 {
+	/*
 	Set xmlPart = ##class(%Net.MIMEPart).%New()
 	Set xmlStream = ##class(%GlobalCharacterStream).%New()
 	Do xmlStream.Write("description")
@@ -209,9 +210,12 @@ ClassMethod InsertMulti(ByRef pRequest As %Net.HttpRequest) As %Status
 	Set tHeaderValue = "form-data; name='description'"
 	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
 	Do xmlPart.SetHeader("Content-Disposition", tHeaderValue)
+*/
 	Set rootMIME = ##class(%Net.MIMEPart).%New()
 	Set rootMIME.ContentType = "multipart/form-data"
-	Do rootMIME.Parts.Insert(xmlPart)
+	Do rootMIME.Parts.Insert(..InsertMultiGetKeyValuePart("description","My Description"))
+	Do rootMIME.Parts.Insert(..InsertMultiGetKeyValuePart("medkazid","12345"))
+	Do rootMIME.Parts.Insert(..InsertMultiGetKeyValuePart("providerid","1234567890"))
 	Set pFile = "D:\tmp1\EU_MJB_#284_TSH_TEST.pdf"
 	Set filePart = ..InsertMultiGetFilePart(pFile)
 	Do rootMIME.Parts.Insert(filePart)
@@ -235,6 +239,21 @@ ClassMethod InsertMultiGetFilePart(pFile As %String = "") As %Net.MIMEPart
 	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
 	Do filePart.SetHeader("Content-Disposition", tHeaderValue)
 	Quit filePart
+}
+
+ClassMethod InsertMultiGetKeyValuePart(pKey As %String = "", pValue As %String) As %Net.MIMEPart
+{
+	Set xmlPart = ##class(%Net.MIMEPart).%New()
+	Set xmlStream = ##class(%GlobalCharacterStream).%New()
+	Do xmlStream.Write(pValue)
+	// Do not set Content-Type for a simple form field.
+	// Set xmlPart.ContentType = "text/plain"
+	Set xmlPart.Body = xmlStream
+	Set tHeaderValue = "form-data; name='key'"
+	Set tHeaderValue = $Replace(tHeaderValue,"'","""")
+	Set tHeaderValue = $Replace(tHeaderValue,"key",pKey)
+	Do xmlPart.SetHeader("Content-Disposition", tHeaderValue)
+	Quit xmlPart
 }
 
 /*
